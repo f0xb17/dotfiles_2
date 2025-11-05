@@ -6,6 +6,8 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local naugthy = require("naughty")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local menubar = require("menubar")
+local wibox = require("wibox")
 
 if awesome.startup_errors then
     naughty.notify({
@@ -47,9 +49,33 @@ awful.layout.layouts = {
     awful.layout.suit.spiral.dwindle
 }
 
+local taglist_buttons = gears.table.join(
+    awful.button({ }, 1, function(t) t:view_only() end)
+)
+
 awful.screen.connect_for_each_screen(function (s)
     set_wallpaper(s)
     awful.tag({ "1", "2", "3", "4", "5" }, s, awful.layout.layouts[1])
+
+    s.mytaglist = awful.widget.taglist {
+        screen = s,
+        filter = awful.widget.taglist.filter.all,
+        buttons = taglist_buttons
+    }
+
+    s.mywibox = awful.wibar({ position = "top", screen = s })
+    s.mywibox:setup {
+        layout = wibox.layout.align.horizontal,
+        {
+            layout = wibox.layout.fixed.horizontal,
+            s.mytaglist
+        },
+        s.mytasklist,
+        {
+            layout = wibox.layout.fixed.horizontal,
+            wibox.widget.systray()
+        }
+    }
 end)
 
 modkey = "Mod4"
